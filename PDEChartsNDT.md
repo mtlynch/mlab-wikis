@@ -439,15 +439,15 @@ Values of receiver window scale are aggregated using the average function, weigh
 ### Probability ###
 
 Values of packet retrasmission, network-limited time ratio and client-limited time ratio at every level of aggregation are computed as the ration between two sums, computed across all the tests in the same aggregation bin.
-In particular, ```sql
+In particular:
 
-* Packet retransmission = SUM(web100_log_entry.snap.SegsRetrans) /
-SUM(web100_log_entry.snap.DataSegsOut)
-* Network-limited time ratio = SUM(web100_log_entry.snap.SndLimTimeCwnd) /
+* Packet retransmission = `SUM(web100_log_entry.snap.SegsRetrans) /
+SUM(web100_log_entry.snap.DataSegsOut)`
+* Network-limited time ratio = `SUM(web100_log_entry.snap.SndLimTimeCwnd) /
 SUM(web100_log_entry.snap.SndLimTimeRwin +
 web100_log_entry.snap.SndLimTimeCwnd +
-web100_log_entry.snap.SndLimTimeSnd)
-* Client-limited time ratio = SUM(web100_log_entry.snap.SndLimTimeRwin) /
+web100_log_entry.snap.SndLimTimeSnd)`
+* Client-limited time ratio = `SUM(web100_log_entry.snap.SndLimTimeRwin) /
 SUM(web100_log_entry.snap.SndLimTimeRwin +
 web100_log_entry.snap.SndLimTimeCwnd +
-web100_log_entry.snap.SndLimTimeSnd)```
+web100_log_entry.snap.SndLimTimeSnd)`
