@@ -9,7 +9,7 @@ If you are an M-Lab operator, this document will help you understand how the
 SliceBaseManager fits into general M-Lab operations and slice management in
 particular.
 
-[This directory](https://code.google.com/p/m-lab/source/browse/slicebasemanager?repo=ops) is a working example.
+[This directory](https://github.com/m-lab/mlab-ops/tree/master/slicebasemanager/slice_example) is a working example of an experiment used on M-Lab.
 
 ## Manager Structure ##
 

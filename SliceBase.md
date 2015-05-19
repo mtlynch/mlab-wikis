@@ -5,8 +5,7 @@
 If you are an M-Lab experiment developer, this document will help you
 prepare your experiment for deployment to M-lab.
 
-[https://code.google.com/p/m-lab/source/browse/slicebasemanager/slice_example?repo=ops
-This directory] is a working example of an experiment used on M-Lab.
+[This directory](https://github.com/m-lab/mlab-ops/tree/master/slicebasemanager/slice_example) is a working example of an experiment used on M-Lab.
 
 ## PROVIDED SERVICES ##
 
@@ -160,7 +159,7 @@ $SLICEHOME/init/status
 > respond to issues first.
 
 > A minimal example script is included
-> [here](https://code.google.com/p/m-lab/source/browse/experimentbase/slice_example/init/status?repo=ops)
+> [here](https://github.com/m-lab/mlab-ops/blob/master/slicebasemanager/slice_example/init/status)
 
 > The status script will be called periodically, i.e. once an hour.
 
