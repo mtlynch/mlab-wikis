@@ -156,8 +156,7 @@ AND web100_log_entry.snap.State <= 11))
 Server-to-client RTT is affected by TCP congestion. As a consequence, there are (at least) 2 ways to estimate the RTT using the web100 data. These 2 ways provide different, non-equivalent information about the user connection.
   1. Server-client **(time) distance**
     * Estimated using the **minimum RTT** measured during the test, which most likely happened before the test reached congestion.
-    * This value is reported by the web100 variable ```sql
-web100_log_entry.snap.MinRTT```
+    * This value is reported by the web100 variable `web100_log_entry.snap.MinRTT`
     * However, using this variable has the drawback that it might underestimate the connection RTT, because it might be measured in the SYC ACK exchange or some other tiny transaction which, for low speed links, does not represent the typical RTT for the full data segment.
     * Note that using `PreCongSumRTT/PreCongCountRTT` does not provide a more accurate estimate, because both `PreCongSumRTT` and `PreCongCountRTT` are recorded right before the first congestion signal, which, in the worst case, occurs when the receiver queue is already full, which affects the RTT.
   1. Server-client **latency during data transfers** (with congestion)
