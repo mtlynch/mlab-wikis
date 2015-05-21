@@ -73,13 +73,14 @@ All the queries include conditions to filter out incomplete test results.
 
 ## Download throughput ##
 
-The download throughput is computed for every server-to-client test as the ratio of the data transmitted during the test and the duration of the test:
+The download throughput is computed for every server-to-client test as the ratio of the data transmitted during the test and the duration of the test. We multiply by 8 to convert from octets (bytes) to bits:
 
 ```
-web100_log_entry.snap.HCThruOctetsAcked /
-(web100_log_entry.snap.SndLimTimeRwin +
-web100_log_entry.snap.SndLimTimeCwnd +
-web100_log_entry.snap.SndLimTimeSnd)
+8 *
+(web100_log_entry.snap.HCThruOctetsAcked /
+ (web100_log_entry.snap.SndLimTimeRwin +
+ web100_log_entry.snap.SndLimTimeCwnd +
+ web100_log_entry.snap.SndLimTimeSnd))
 ```
 
 Results of tests that ended during **slow start** are excluded.
@@ -87,13 +88,14 @@ Results of tests that ended during **slow start** are excluded.
 The complete BigQuery query is:
 ```sql
 SELECT
- web100_log_entry.connection_spec.remote_ip,
- web100_log_entry.connection_spec.local_ip,
- web100_log_entry.snap.HCThruOctetsAcked/
-     (web100_log_entry.snap.SndLimTimeRwin +
-      web100_log_entry.snap.SndLimTimeCwnd +
-      web100_log_entry.snap.SndLimTimeSnd)
-FROM [table_name]
+ web100_log_entry.connection_spec.remote_ip AS remote_ip,
+ web100_log_entry.connection_spec.local_ip AS local_ip,
+ 8 * (web100_log_entry.snap.HCThruOctetsAcked /
+      (web100_log_entry.snap.SndLimTimeRwin +
+       web100_log_entry.snap.SndLimTimeCwnd +
+       web100_log_entry.snap.SndLimTimeSnd)) AS download_Mbps
+FROM
+ [plx.google:m_lab.YYYY_MM.all]
 WHERE
  IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip)
  AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)
@@ -115,40 +117,41 @@ WHERE
       web100_log_entry.snap.SndLimTimeSnd) < 3600000000
  AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CongSignals)
  AND web100_log_entry.snap.CongSignals > 0
-AND (web100_log_entry.snap.State == 1
-OR (web100_log_entry.snap.State >= 5
-AND web100_log_entry.snap.State <= 11))
+ AND (web100_log_entry.snap.State == 1
+      OR (web100_log_entry.snap.State >= 5
+          AND web100_log_entry.snap.State <= 11))
 ```
 
 ## Upload throughput ##
 
-The upload throughput is computed for every client-to-server test as the ratio of the data transmitted during the test and the duration of the test: `web100_log_entry.snap.HCThruOctetsReceived/web100_log_entry.snap.Duration`
+The upload throughput is computed for every client-to-server test as the ratio of the data transmitted during the test and the duration of the test. We multiply by 8 to convert from octets (bytes) to bits: `8 * (web100_log_entry.snap.HCThruOctetsReceived/web100_log_entry.snap.Duration)`
 
-It's not possible to exclude results of tests that ended during slow start, because the web100 variable `web100_log_entry.snap.CongSignals` is not updated during client-to-server tests.
+It is not possible to exclude results of tests that ended during slow start, because the web100 variable `web100_log_entry.snap.CongSignals` is not updated during client-to-server tests.
 
 The complete BigQuery query is:
 ```sql
 SELECT
-web100_log_entry.connection_spec.remote_ip,
-web100_log_entry.connection_spec.local_ip,
-web100_log_entry.snap.HCThruOctetsReceived/web100_log_entry.snap.Duration
-FROM [table_name]
+ web100_log_entry.connection_spec.remote_ip AS remote_ip,
+ web100_log_entry.connection_spec.local_ip AS local_ip,
+ 8 * (web100_log_entry.snap.HCThruOctetsReceived/web100_log_entry.snap.Duration) AS upload_Mbps
+FROM
+ [plx.google:m_lab.YYYY_MM.all]
 WHERE
 IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip)
-AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)
-AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsReceived)
-AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.Duration)
-AND project = 0
-AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction)
-AND connection_spec.data_direction = 0
-AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry)
-AND web100_log_entry.is_last_entry = True
-AND web100_log_entry.snap.HCThruOctetsReceived >= 8192
-AND web100_log_entry.snap.Duration >= 9000000
-AND web100_log_entry.snap.Duration < 3600000000
-AND (web100_log_entry.snap.State == 1
-OR (web100_log_entry.snap.State >= 5
-AND web100_log_entry.snap.State <= 11))
+ AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)
+ AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsReceived)
+ AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.Duration)
+ AND project = 0
+ AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction)
+ AND connection_spec.data_direction = 0
+ AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry)
+ AND web100_log_entry.is_last_entry = True
+ AND web100_log_entry.snap.HCThruOctetsReceived >= 8192
+ AND web100_log_entry.snap.Duration >= 9000000
+ AND web100_log_entry.snap.Duration < 3600000000
+ AND (web100_log_entry.snap.State == 1
+      OR (web100_log_entry.snap.State >= 5
+          AND web100_log_entry.snap.State <= 11))
 ```
 
 ## Round Trip Time (RTT) ##
@@ -156,8 +159,7 @@ AND web100_log_entry.snap.State <= 11))
 Server-to-client RTT is affected by TCP congestion. As a consequence, there are (at least) 2 ways to estimate the RTT using the web100 data. These 2 ways provide different, non-equivalent information about the user connection.
   1. Server-client **(time) distance**
     * Estimated using the **minimum RTT** measured during the test, which most likely happened before the test reached congestion.
-    * This value is reported by the web100 variable ```sql
-web100_log_entry.snap.MinRTT```
+    * This value is reported by the web100 variable `web100_log_entry.snap.MinRTT`
     * However, using this variable has the drawback that it might underestimate the connection RTT, because it might be measured in the SYC ACK exchange or some other tiny transaction which, for low speed links, does not represent the typical RTT for the full data segment.
     * Note that using `PreCongSumRTT/PreCongCountRTT` does not provide a more accurate estimate, because both `PreCongSumRTT` and `PreCongCountRTT` are recorded right before the first congestion signal, which, in the worst case, occurs when the receiver queue is already full, which affects the RTT.
   1. Server-client **latency during data transfers** (with congestion)
@@ -170,10 +172,11 @@ Given that the NDT server updates the web100 variables `web100_log_entry.snap.Mi
 The complete BigQuery query is:
 ```sql
 SELECT
-web100_log_entry.connection_spec.remote_ip,
-web100_log_entry.connection_spec.local_ip,
-web100_log_entry.snap.MinRTT
-FROM [table_name]
+ web100_log_entry.connection_spec.remote_ip AS remote_ip,
+ web100_log_entry.connection_spec.local_ip AS local_ip,
+ web100_log_entry.snap.MinRTT AS min_rtt
+FROM
+ [plx.google:m_lab.YYYY_MM.all]
 WHERE
  IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip)
  AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)
@@ -193,12 +196,12 @@ WHERE
  AND (web100_log_entry.snap.SndLimTimeRwin +
       web100_log_entry.snap.SndLimTimeCwnd +  
       web100_log_entry.snap.SndLimTimeSnd) < 3600000000
-AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.MinRTT)
-AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CountRTT)
-AND web100_log_entry.snap.CountRTT > 0
-AND (web100_log_entry.snap.State == 1
-OR (web100_log_entry.snap.State >= 5
-AND web100_log_entry.snap.State <= 11))
+ AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.MinRTT)
+ AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CountRTT)
+ AND web100_log_entry.snap.CountRTT > 0
+ AND (web100_log_entry.snap.State == 1
+      OR (web100_log_entry.snap.State >= 5
+          AND web100_log_entry.snap.State <= 11))
 ```
 
 ## Number of tests ##
@@ -227,10 +230,11 @@ It is possible to also measure the byte retransmission, as `web100_log_entry.sna
 The complete BigQuery query is:
 ```sql
 SELECT
- web100_log_entry.connection_spec.remote_ip,
- web100_log_entry.connection_spec.local_ip,
- web100_log_entry.snap.SegsRetrans/web100_log_entry.snap.DataSegsOut
-FROM [table_name]
+ web100_log_entry.connection_spec.remote_ip AS remote_ip,
+ web100_log_entry.connection_spec.local_ip AS local_ip,
+ (web100_log_entry.snap.SegsRetrans / web100_log_entry.snap.DataSegsOut) AS packet_retransmission_rate
+FROM
+ [plx.google:m_lab.YYYY_MM.all]
 WHERE
  IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip)
  AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)
@@ -253,9 +257,9 @@ WHERE
  AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SegsRetrans)
  AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.DataSegsOut)
  AND web100_log_entry.snap.DataSegsOut > 0
-AND (web100_log_entry.snap.State == 1
-OR (web100_log_entry.snap.State >= 5
-AND web100_log_entry.snap.State <= 11))
+ AND (web100_log_entry.snap.State == 1
+      OR (web100_log_entry.snap.State >= 5
+          AND web100_log_entry.snap.State <= 11))
 ```
 
 ## Network-limited ratio and client-limited time ratio ##
@@ -277,11 +281,12 @@ The complete BigQuery query to compute network-limited time is:
 SELECT
  web100_log_entry.connection_spec.remote_ip,
  web100_log_entry.connection_spec.local_ip,
- web100_log_entry.snap.SndLimTimeCwnd/
-     (web100_log_entry.snap.SndLimTimeRwin +
-      web100_log_entry.snap.SndLimTimeCwnd +
-      web100_log_entry.snap.SndLimTimeSnd)
-FROM [table_name]
+ web100_log_entry.snap.SndLimTimeCwnd /
+   (web100_log_entry.snap.SndLimTimeRwin +
+    web100_log_entry.snap.SndLimTimeCwnd +
+    web100_log_entry.snap.SndLimTimeSnd) AS network_limited_time
+FROM
+ [plx.google:m_lab.YYYY_MM.all]
 WHERE
  IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip)
  AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)
@@ -302,20 +307,21 @@ WHERE
       web100_log_entry.snap.SndLimTimeCwnd +  
       web100_log_entry.snap.SndLimTimeSnd) < 3600000000
 AND (web100_log_entry.snap.State == 1
-OR (web100_log_entry.snap.State >= 5
-AND web100_log_entry.snap.State <= 11))
+     OR (web100_log_entry.snap.State >= 5
+         AND web100_log_entry.snap.State <= 11))
 ```
 
 The complete BigQuery query to compute receiver-limited time is:
 ```sql
 SELECT
- web100_log_entry.connection_spec.remote_ip,
- web100_log_entry.connection_spec.local_ip,
- web100_log_entry.snap.SndLimTimeRwin/
-     (web100_log_entry.snap.SndLimTimeRwin +
-      web100_log_entry.snap.SndLimTimeCwnd +
-      web100_log_entry.snap.SndLimTimeSnd)
-FROM [table_name]
+ web100_log_entry.connection_spec.remote_ip AS remote_ip,
+ web100_log_entry.connection_spec.local_ip AS local_ip,
+ web100_log_entry.snap.SndLimTimeRwin /
+   (web100_log_entry.snap.SndLimTimeRwin +
+    web100_log_entry.snap.SndLimTimeCwnd +
+    web100_log_entry.snap.SndLimTimeSnd) AS receiver_limited_time
+FROM
+ [plx.google:m_lab.YYYY_MM.all]
 WHERE
  IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip)
  AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)
@@ -335,9 +341,9 @@ WHERE
  AND (web100_log_entry.snap.SndLimTimeRwin +
       web100_log_entry.snap.SndLimTimeCwnd +  
       web100_log_entry.snap.SndLimTimeSnd) < 3600000000
-AND (web100_log_entry.snap.State == 1
-OR (web100_log_entry.snap.State >= 5
-AND web100_log_entry.snap.State <= 11))
+ AND (web100_log_entry.snap.State == 1
+      OR (web100_log_entry.snap.State >= 5
+          AND web100_log_entry.snap.State <= 11))
 ```
 
 ## Receiver window scale ##
@@ -351,10 +357,11 @@ As described in the [web100 variable definition](http://www.web100.org/download/
 The complete BigQuery query is:
 ```sql
 SELECT
- web100_log_entry.connection_spec.remote_ip,
- web100_log_entry.connection_spec.local_ip,
+ web100_log_entry.connection_spec.remote_ip AS remote_ip,
+ web100_log_entry.connection_spec.local_ip AS local_ip,
  web100_log_entry.snap.WinScaleRcvd
-FROM [table_name]
+FROM
+ [plx.google:m_lab.YYYY_MM.all]
 WHERE
  IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip)
  AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)
@@ -375,11 +382,11 @@ WHERE
       web100_log_entry.snap.SndLimTimeCwnd +  
       web100_log_entry.snap.SndLimTimeSnd) < 3600000000
  AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.WinScaleRcvd)
-AND web100_log_entry.snap.WinScaleRcvd >= -1
-AND web100_log_entry.snap.WinScaleRcvd <= 14
-AND (web100_log_entry.snap.State == 1
-OR (web100_log_entry.snap.State >= 5
-AND web100_log_entry.snap.State <= 11))
+ AND web100_log_entry.snap.WinScaleRcvd >= -1
+ AND web100_log_entry.snap.WinScaleRcvd <= 14
+ AND (web100_log_entry.snap.State == 1
+      OR (web100_log_entry.snap.State >= 5
+          AND web100_log_entry.snap.State <= 11))
 ```
 
 # Aggregate query results #
