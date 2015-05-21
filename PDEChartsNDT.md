@@ -315,7 +315,7 @@ The complete BigQuery query to compute receiver-limited time is:
 SELECT
  web100_log_entry.connection_spec.remote_ip AS remote_ip,
  web100_log_entry.connection_spec.local_ip AS local_ip,
- web100_log_entry.snap.SndLimTimeRwini /
+ web100_log_entry.snap.SndLimTimeRwin /
    (web100_log_entry.snap.SndLimTimeRwin +
     web100_log_entry.snap.SndLimTimeCwnd +
     web100_log_entry.snap.SndLimTimeSnd) AS receiver_limited_time
