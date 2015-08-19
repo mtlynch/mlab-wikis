@@ -28,11 +28,11 @@ Back to top
 
 The following table is an example of the BigQuery M-Lab table. Rows ` a1`, `a2`, `a3` have been collected during the test `a`, while rows `b1` and `b2` have been collected during the test `b`. The next section explains what each field represents.
 
-| 		        |		        |  test_id |  web100_log_entry.log_time |  web100_log_entry.snap.MinRTT |  ... |
-| --------------|:----------- -:| :-------:|:--------------------------:| :----------------------------:|-----:|
-| test `a`      |  snapshot `a1`|  xxxxx   |  1265249248 		        |  8             		        |      |
+|               |               |  test_id |  web100_log_entry.log_time |  web100_log_entry.snap.MinRTT |  ... |
+| --------------|:-------------:| :-------:|:--------------------------:| :----------------------------:|-----:|
+| test `a`      |  snapshot `a1`|  xxxxx   |  1265249248 		             |  8             		             |      |
 |               |  snapshot `a2`|  xxxxx   |  1265249248                |  90                           |      |
-| 	            |  snapshot `a3`|  xxxxx   |  1265249248                |  137                          |      |
+| 	             |  snapshot `a3`|  xxxxx   |  1265249248                |  137                          |      |
 | test `b`      |  snapshot `b1`|  yyyyy   |  1266216058                |  20                           |      |
 |               |  snapshot `b2`|  yyyyy   |  1266216058                |  154                          |      |
 
