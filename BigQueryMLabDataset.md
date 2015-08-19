@@ -238,10 +238,10 @@ Result:
 * The following query computes the number of distinct IP addresses that have run tests using 2 distinct tool clients (between midnight Jan 1 2010 and midnight Jan 3 2010).
 * The nested query returns a table, where each row represents a client IP address and contains the number of tools ever used by that address.
 ``` 
-    **SELECT COUNT(remote_ip) AS num_ip_addresses
+    SELECT COUNT(remote_ip) AS num_ip_addresses
     FROM (
       SELECT web100_log_entry.connection_spec.remote_ip AS remote_ip,
-             COUNT(DISTINCT project) AS num_projects**
+             COUNT(DISTINCT project) AS num_projects
       FROM [plx.google:m_lab.2010_01.all]
       WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
             IS_EXPLICITLY_DEFINED(project) AND
