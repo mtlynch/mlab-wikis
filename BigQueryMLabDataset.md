@@ -217,7 +217,7 @@ BigQuery supports various functions to parse IP addresses in different formats. 
 
 * The following query aggregates the client IP addresses into /24s and counts the number of unique /24s that have ever initiated at least one test (between midnight Jan 1 2010 and midnight Jan 3 2010).
 * `PARSE_IP(remote_ip) & INTEGER(POW(2, 32) - POW(2, 32 - 24)))` computes a bit-wise AND between `web100_log_entry.connection_spec.remote_ip` and 255.255.255.0. The [ BigQuery Query Reference][14] describes the `PARSE_IP` and `FORMAT_IP` functions.
-
+``` 
     SELECT **COUNT(DISTINCT FORMAT_IP(PARSE_IP(web100_log_entry.connection_spec.remote_ip)
                           & INTEGER(POW(2, 32) - POW(2, 32 - 26)))) AS num_subnets**
     FROM [plx.google:m_lab.2010_01.all]
@@ -225,7 +225,7 @@ BigQuery supports various functions to parse IP addresses in different formats. 
           IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
           web100_log_entry.log_time > 1262304000 AND
           web100_log_entry.log_time < 1262476800;
-
+``` 
 Result:
 
     num_subnets
