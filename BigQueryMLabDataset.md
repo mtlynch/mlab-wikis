@@ -115,7 +115,7 @@ The following table describes the schema of the BigQuery table that contains M-L
 
 This section shows you how to compute some basic statistics about the population of users who have run NDT and/or NPAD tests. For purposes of this exercise, each user has a single IP address and each IP address identifies a single user.
 
-In order to limit the query run time, the examples presented in this exercise refer to the data collected by all the M-Lab servers during a very limited time interval (between **midnight January 1st 2010** and ** midnight January 3rd 2010**).
+In order to limit the query run time, the examples presented in this exercise refer to the data collected by all the M-Lab servers during a very limited time interval (between **midnight January 1st 2010** and **midnight January 3rd 2010**).
 
 Sample queries:
 
