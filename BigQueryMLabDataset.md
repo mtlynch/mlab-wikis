@@ -187,8 +187,8 @@ Result:
 
 If you prefer to have the output with timestamps in a "readable" format, use the following query.
 
-    SELECT **STRFTIME_UTC_USEC(day, '%Y-%m-%d') AS day,
-           num_clients**
+    SELECT STRFTIME_UTC_USEC(day, '%Y-%m-%d') AS day,
+           num_clients
     FROM (
       SELECT UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000) AS day,
       COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients
