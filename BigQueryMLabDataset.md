@@ -39,7 +39,7 @@ The following table is an example of the BigQuery M-Lab table. Rows ` a1`, `a2`,
 The following table describes the schema of the BigQuery table that contains M-Lab data.
 
 | Field name             			                  |     Type     |  Description                              |
-| ----------------------------------------------------|:------------:|------------------------------------------:|
+| :----------------------------------------------------|:------------:|:------------------------------------------|
 | `test_id`                                           |  `string`    |  ID of the test. It represents the filename of the log that contains the data generated during the test (e.g., 20090819T02:01:04.507508000Z_189.6.232.77:3859.c2s_snaplog.gz). |
 | `project`                                           |  `integer`   |  Tool that ran the test. {NDT = `0`, NPAD = `1`, SideStream = `2`, paris-traceroute = `3`}  |
 | `type`                                              |  `integer`   |  Currently not supported. |
