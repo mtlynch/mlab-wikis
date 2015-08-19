@@ -14,7 +14,6 @@ BigQuery contains M-Lab logs generated since **January 2009** by three M-Lab too
 
 For more details about M-Lab, NDT and NPAD, see the [M-Lab website][8].
 
-Back to top
 
 ## Schema
 
@@ -111,7 +110,6 @@ The following table describes the schema of the BigQuery table that contains M-L
 | `string`      |  `Ip_Address`            |
 | `bool`        |  `TruthValue`            |
 
-Back to top
 
 ## Sample queries — _Basic statistics about the NDT and NPAD user population_
 
@@ -162,7 +160,6 @@ If you prefer to handle timestamps in a "readable" format, re-write the query as
 
 Be aware that using `PARSE_UTC_USEC` can slow down the query. The [ BigQuery Query Reference][13] describes the `PARSE_UTC_USEC` function.
 
-Back to top
 
 #### Computing statistics over time — How many users per day?
 
@@ -213,7 +210,6 @@ Result:
 
 Be aware that using `STRFTIME_UTC_USEC` can significantly slow down the query. The [BigQuery Query Reference][13] describes the `STRFTIME_UTC_USEC` function.
 
-Back to top
 
 #### Dealing with IP addresses — How many users from distinct subnets?
 
@@ -236,7 +232,6 @@ Result:
     -----------
           30256
 
-Back to top
 
 #### Comparing NDT and NPAD tests — How many users have run both NDT and NPAD tests?
 
@@ -263,7 +258,6 @@ Result:
     ----------------
                   71
 
-Back to top
 
 #### Computing distributions of tests across users — How many users have run a certain number of tests?
 
@@ -313,7 +307,7 @@ Result:
            11         158
     [...]
 
-Back to top
+
 
 [1]: http://www.measurementlab.net/about
 [2]: http://creativecommons.org/about/cc0
