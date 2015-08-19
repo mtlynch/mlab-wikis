@@ -237,7 +237,7 @@ Result:
 
 * The following query computes the number of distinct IP addresses that have run tests using 2 distinct tool clients (between midnight Jan 1 2010 and midnight Jan 3 2010).
 * The nested query returns a table, where each row represents a client IP address and contains the number of tools ever used by that address.
-
+``` 
     **SELECT COUNT(remote_ip) AS num_ip_addresses
     FROM (
       SELECT web100_log_entry.connection_spec.remote_ip AS remote_ip,
@@ -251,7 +251,7 @@ Result:
       **GROUP BY remote_ip
     )
     WHERE num_projects = 2;**
-
+``` 
 Result:
 
     num_ip_addresses
@@ -268,7 +268,7 @@ Some IP addresses may have initiated tests, while others only have a few tests. 
 * The following query computes the number of tests initiated by each client IP address, groups the IP addresses by the number of tests run, and returns the number of IP addresses in each group.
 * The innermost nested query returns a table, where each row represents a test. BigQuery does not support the SQL command `DISTINCT` on multiple fields. So the query uses the `GROUP BY` clause to collapse all the rows with the same `test_id` and `remote_ip`. The [ BigQuery Query Reference][15] describes the `GROUP BY` command.
 * The outermost nested query returns a table, where each row represents a client IP address and contains the number of tests initiated by that address.
-
+``` 
     **SELECT num_tests,
            COUNT(*) AS num_clients
       FROM (
@@ -289,7 +289,7 @@ Some IP addresses may have initiated tests, while others only have a few tests. 
     )
     GROUP BY num_tests
     ORDER BY num_tests ASC;**
-
+``` 
 Result:
 
     num_tests num_clients
