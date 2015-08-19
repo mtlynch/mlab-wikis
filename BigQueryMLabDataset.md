@@ -317,10 +317,10 @@ Back to top
 
 [1]: http://www.measurementlab.net/about
 [2]: http://creativecommons.org/about/cc0
-[3]: http://www.measurementlab.net/measurement-lab-tools#ndt
-[4]: http://www.measurementlab.net/measurement-lab-tools#npad
-[5]: http://www.measurementlab.net/measurement-lab-tools#sidestream
-[6]: http://www.measurementlab.net/measurement-lab-tools#paris-traceroute
+[3]: http://www.measurementlab.net/tools/ndt
+[4]: http://www.measurementlab.net/tools/npad
+[5]: http://www.measurementlab.net/tools/sidestream
+[6]: http://www.measurementlab.net/tools/paris-traceroute
 [7]: https://cloud.google.com/bigquery/bq-command-line-tool
 [8]: http://www.measurementlab.net/
 [9]: http://www.maxmind.com/
