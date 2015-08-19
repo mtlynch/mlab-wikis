@@ -147,7 +147,7 @@ If you are only interested in the clients that have run **NDT** (`project = 0`) 
           IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
           web100_log_entry.log_time > 1262304000 AND
           web100_log_entry.log_time < 1262476800 AND
-          **project = 0;**
+          project = 0;
 
 If you prefer to handle timestamps in a "readable" format, re-write the query as follows:
 
@@ -155,8 +155,8 @@ If you prefer to handle timestamps in a "readable" format, re-write the query as
     FROM [plx.google:m_lab.2010_01.all]
     WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
           IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
-          web100_log_entry.log_time > **PARSE_UTC_USEC('2010-01-01 00:00:00') / POW(10, 6)** AND
-          web100_log_entry.log_time < **PARSE_UTC_USEC('2010-01-03 00:00:00') / POW(10, 6);**
+          web100_log_entry.log_time > PARSE_UTC_USEC('2010-01-01 00:00:00') / POW(10, 6) AND
+          web100_log_entry.log_time < PARSE_UTC_USEC('2010-01-03 00:00:00') / POW(10, 6);
 
 Be aware that using `PARSE_UTC_USEC` can slow down the query. The [ BigQuery Query Reference][13] describes the `PARSE_UTC_USEC` function.
 
@@ -175,8 +175,8 @@ By slightly modifying the previous query, it is possible to compute how the numb
           IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
           web100_log_entry.log_time > 1262304000 AND
           web100_log_entry.log_time < 1262476800
-    **GROUP BY day
-    ORDER BY day ASC;**
+    GROUP BY day
+    ORDER BY day ASC;
 ``` 
 Result:
 
@@ -218,8 +218,8 @@ BigQuery supports various functions to parse IP addresses in different formats. 
 * The following query aggregates the client IP addresses into /24s and counts the number of unique /24s that have ever initiated at least one test (between midnight Jan 1 2010 and midnight Jan 3 2010).
 * `PARSE_IP(remote_ip) & INTEGER(POW(2, 32) - POW(2, 32 - 24)))` computes a bit-wise AND between `web100_log_entry.connection_spec.remote_ip` and 255.255.255.0. The [ BigQuery Query Reference][14] describes the `PARSE_IP` and `FORMAT_IP` functions.
 ``` 
-    SELECT **COUNT(DISTINCT FORMAT_IP(PARSE_IP(web100_log_entry.connection_spec.remote_ip)
-                          & INTEGER(POW(2, 32) - POW(2, 32 - 26)))) AS num_subnets**
+    SELECT COUNT(DISTINCT FORMAT_IP(PARSE_IP(web100_log_entry.connection_spec.remote_ip)
+                          & INTEGER(POW(2, 32) - POW(2, 32 - 26)))) AS num_subnets
     FROM [plx.google:m_lab.2010_01.all]
     WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
           IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
@@ -248,9 +248,9 @@ Result:
             IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
             web100_log_entry.log_time > 1262304000 AND
             web100_log_entry.log_time < 1262476800
-      **GROUP BY remote_ip
+      GROUP BY remote_ip
     )
-    WHERE num_projects = 2;**
+    WHERE num_projects = 2;
 ``` 
 Result:
 
@@ -269,26 +269,26 @@ Some IP addresses may have initiated tests, while others only have a few tests. 
 * The innermost nested query returns a table, where each row represents a test. BigQuery does not support the SQL command `DISTINCT` on multiple fields. So the query uses the `GROUP BY` clause to collapse all the rows with the same `test_id` and `remote_ip`. The [ BigQuery Query Reference][15] describes the `GROUP BY` command.
 * The outermost nested query returns a table, where each row represents a client IP address and contains the number of tests initiated by that address.
 ``` 
-    **SELECT num_tests,
+    SELECT num_tests,
            COUNT(*) AS num_clients
       FROM (
         SELECT remote_ip,
                COUNT(*) AS num_tests
         FROM (
           SELECT test_id,
-                 web100_log_entry.connection_spec.remote_ip AS remote_ip**
+                 web100_log_entry.connection_spec.remote_ip AS remote_ip
           FROM [plx.google:m_lab.2010_01.all]
           WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
                 IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
                 web100_log_entry.log_time > 1262304000 AND
-                web100_log_entry.log_time < 1262476800 **AND
+                web100_log_entry.log_time < 1262476800 AND
                 IS_EXPLICITLY_DEFINED(web100_log_entry.log_time)
           GROUP BY test_id, remote_ip
       )
       GROUP BY remote_ip
     )
     GROUP BY num_tests
-    ORDER BY num_tests ASC;**
+    ORDER BY num_tests ASC;
 ``` 
 Result:
 
