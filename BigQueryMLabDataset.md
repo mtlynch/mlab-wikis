@@ -19,8 +19,8 @@ For more details about M-Lab, NDT and NPAD, see the [M-Lab website][8].
 
 * Each M-Lab tool consists of a **client** and a **server **. Whenever an M-Lab user starts a test, the client and server interact to measure different aspects of that user's connection.
 * A single user request triggers one or more **tests** (e.g., client-to-server test, server-to-client test).
-* For each test, a server collects a ** Web100 log** and the test can be identified by the log filename.
-* A Web100 log is a sequence of **Web100 snapshots**, where a Web100 snapshot consists of the values of all the **Web100 variables ** at a given time. The last entry of a Web100 log contains the value of all the Web100 variables at the end of a test.
+* For each test, a server collects a **Web100 log** and the test can be identified by the log filename.
+* A Web100 log is a sequence of **Web100 snapshots**, where a Web100 snapshot consists of the values of all the **Web100 variables** at a given time. The last entry of a Web100 log contains the value of all the Web100 variables at the end of a test.
 * BigQuery stores all the M-Lab data in multiple tables, within a **single, public BigQuery dataset**.
 * Each table row represents a **single Web100 snapshot** collected during a test.
 * For each test, the table contains **one or more rows** (one row for each Web100 snapshot collected during that test).
