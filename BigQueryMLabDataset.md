@@ -168,8 +168,8 @@ By slightly modifying the previous query, it is possible to compute how the numb
 * The following query splits the time period (between midnight Jan 1 2010 and midnight Jan 3 2010) into 1-day time intervals and counts the number of unique client IP addresses within each time interval. Every client IP address is counted at most once per day.
 * `UTC_USEC_TO_DAY` expects a timestamp in microseconds, while `web100_log_entry.log_time` is in seconds. The [ BigQuery Query Reference][13] describes the `UTC_USEC_TO_DAY` function.
 ``` 
-    SELECT **INTEGER(UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000)/1000000) AS day,
-          COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients**
+    SELECT INTEGER(UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000)/1000000) AS day,
+          COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients
     FROM [plx.google:m_lab.2010_01.all]
     WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
           IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
