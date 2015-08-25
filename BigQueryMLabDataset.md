@@ -17,7 +17,7 @@ For more details about M-Lab, NDT and NPAD, see the [M-Lab website][8].
 
 ## Schema
 
-* Each M-Lab tool consists of a **client** and a **server **. Whenever an M-Lab user starts a test, the client and server interact to measure different aspects of that user's connection.
+* Each M-Lab tool consists of a **client** and a **server**. Whenever an M-Lab user starts a test, the client and server interact to measure different aspects of that user's connection.
 * A single user request triggers one or more **tests** (e.g., client-to-server test, server-to-client test).
 * For each test, a server collects a **Web100 log** and the test can be identified by the log filename.
 * A Web100 log is a sequence of **Web100 snapshots**, where a Web100 snapshot consists of the values of all the **Web100 variables** at a given time. The last entry of a Web100 log contains the value of all the Web100 variables at the end of a test.
@@ -57,8 +57,7 @@ The following table describes the schema of the BigQuery table that contains M-L
 | `connection_spec.client_os`                         |  `string`    |  Client's operating system. (This field is **optional**.) |
 | `connection_spec.client_kernel_version`             |  `string`    |  Client's kernel version. (This field is **optional**.) |
 | `connection_spec.client_version`                    |  `string`    |  Client's version. (This field is **optional**.) |
-| `connection_spec.client_geolocation.continent_code` |  `string`    |  Geolocation fields extracted from open dataset created by MaxMind<br>
- and available at [www.maxmind.com][9]. (These fields are **optional**.) |
+| `connection_spec.client_geolocation.continent_code` |  `string`    |  Geolocation fields extracted from open dataset created by MaxMind and available at [www.maxmind.com][9]. (These fields are **optional**.) |
 | `connection_spec.client_geolocation.country_code`   |  `string`    |   |
 | `connection_spec.client_geolocation.country_code3`  |  `string`    |   |
 | `connection_spec.client_geolocation.country_name`   |  `string`    |   |
@@ -141,22 +140,26 @@ Result:
 
 If you are only interested in the clients that have run **NDT** (`project = 0`) tests, the query is:
 
-    SELECT COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients
-    FROM [plx.google:m_lab.2010_01.all]
-    WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
-          IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
-          web100_log_entry.log_time > 1262304000 AND
-          web100_log_entry.log_time < 1262476800 AND
-          project = 0;
+```sql
+SELECT COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients
+FROM [plx.google:m_lab.2010_01.all]
+WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
+      IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
+      web100_log_entry.log_time > 1262304000 AND
+      web100_log_entry.log_time < 1262476800 AND
+      project = 0;
+```
 
 If you prefer to handle timestamps in a "readable" format, re-write the query as follows:
 
-    SELECT COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients
-    FROM [plx.google:m_lab.2010_01.all]
-    WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
-          IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
-          web100_log_entry.log_time > PARSE_UTC_USEC('2010-01-01 00:00:00') / POW(10, 6) AND
-          web100_log_entry.log_time < PARSE_UTC_USEC('2010-01-03 00:00:00') / POW(10, 6);
+```sql
+SELECT COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients
+FROM [plx.google:m_lab.2010_01.all]
+WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
+      IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
+      web100_log_entry.log_time > PARSE_UTC_USEC('2010-01-01 00:00:00') / POW(10, 6) AND
+      web100_log_entry.log_time < PARSE_UTC_USEC('2010-01-03 00:00:00') / POW(10, 6);
+```
 
 Be aware that using `PARSE_UTC_USEC` can slow down the query. The [ BigQuery Query Reference][13] describes the `PARSE_UTC_USEC` function.
 
@@ -167,17 +170,17 @@ By slightly modifying the previous query, it is possible to compute how the numb
 
 * The following query splits the time period (between midnight Jan 1 2010 and midnight Jan 3 2010) into 1-day time intervals and counts the number of unique client IP addresses within each time interval. Every client IP address is counted at most once per day.
 * `UTC_USEC_TO_DAY` expects a timestamp in microseconds, while `web100_log_entry.log_time` is in seconds. The [ BigQuery Query Reference][13] describes the `UTC_USEC_TO_DAY` function.
-``` 
-    SELECT INTEGER(UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000)/1000000) AS day,
-          COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients
-    FROM [plx.google:m_lab.2010_01.all]
-    WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
-          IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
-          web100_log_entry.log_time > 1262304000 AND
-          web100_log_entry.log_time < 1262476800
-    GROUP BY day
-    ORDER BY day ASC;
-``` 
+```sql
+SELECT INTEGER(UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000)/1000000) AS day,
+      COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients
+FROM [plx.google:m_lab.2010_01.all]
+WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
+      IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
+      web100_log_entry.log_time > 1262304000 AND
+      web100_log_entry.log_time < 1262476800
+GROUP BY day
+ORDER BY day ASC;
+```
 Result:
 
     day        num_clients
@@ -187,19 +190,21 @@ Result:
 
 If you prefer to have the output with timestamps in a "readable" format, use the following query.
 
-    SELECT STRFTIME_UTC_USEC(day, '%Y-%m-%d') AS day,
-           num_clients
-    FROM (
-      SELECT UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000) AS day,
-      COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients
-      FROM [plx.google:m_lab.2010_01.all]
-      WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
-            IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
-            web100_log_entry.log_time > 1262304000 AND
-            web100_log_entry.log_time < 1262476800
-      GROUP BY day
-      ORDER BY day ASC
-    );
+```sql
+SELECT STRFTIME_UTC_USEC(day, '%Y-%m-%d') AS day,
+       num_clients
+FROM (
+  SELECT UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000) AS day,
+  COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients
+  FROM [plx.google:m_lab.2010_01.all]
+  WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
+        IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
+        web100_log_entry.log_time > 1262304000 AND
+        web100_log_entry.log_time < 1262476800
+  GROUP BY day
+  ORDER BY day ASC
+);
+```
 
 Result:
 
@@ -217,15 +222,15 @@ BigQuery supports various functions to parse IP addresses in different formats. 
 
 * The following query aggregates the client IP addresses into /24s and counts the number of unique /24s that have ever initiated at least one test (between midnight Jan 1 2010 and midnight Jan 3 2010).
 * `PARSE_IP(remote_ip) & INTEGER(POW(2, 32) - POW(2, 32 - 24)))` computes a bit-wise AND between `web100_log_entry.connection_spec.remote_ip` and 255.255.255.0. The [ BigQuery Query Reference][14] describes the `PARSE_IP` and `FORMAT_IP` functions.
-``` 
-    SELECT COUNT(DISTINCT FORMAT_IP(PARSE_IP(web100_log_entry.connection_spec.remote_ip)
-                          & INTEGER(POW(2, 32) - POW(2, 32 - 26)))) AS num_subnets
-    FROM [plx.google:m_lab.2010_01.all]
-    WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
-          IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
-          web100_log_entry.log_time > 1262304000 AND
-          web100_log_entry.log_time < 1262476800;
-``` 
+```sql
+SELECT COUNT(DISTINCT FORMAT_IP(PARSE_IP(web100_log_entry.connection_spec.remote_ip)
+                      & INTEGER(POW(2, 32) - POW(2, 32 - 26)))) AS num_subnets
+FROM [plx.google:m_lab.2010_01.all]
+WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
+      IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
+      web100_log_entry.log_time > 1262304000 AND
+      web100_log_entry.log_time < 1262476800;
+```
 Result:
 
     num_subnets
@@ -237,21 +242,21 @@ Result:
 
 * The following query computes the number of distinct IP addresses that have run tests using 2 distinct tool clients (between midnight Jan 1 2010 and midnight Jan 3 2010).
 * The nested query returns a table, where each row represents a client IP address and contains the number of tools ever used by that address.
-``` 
-    SELECT COUNT(remote_ip) AS num_ip_addresses
-    FROM (
-      SELECT web100_log_entry.connection_spec.remote_ip AS remote_ip,
-             COUNT(DISTINCT project) AS num_projects
-      FROM [plx.google:m_lab.2010_01.all]
-      WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
-            IS_EXPLICITLY_DEFINED(project) AND
-            IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
-            web100_log_entry.log_time > 1262304000 AND
-            web100_log_entry.log_time < 1262476800
-      GROUP BY remote_ip
-    )
-    WHERE num_projects = 2;
-``` 
+```sql
+SELECT COUNT(remote_ip) AS num_ip_addresses
+FROM (
+  SELECT web100_log_entry.connection_spec.remote_ip AS remote_ip,
+         COUNT(DISTINCT project) AS num_projects
+  FROM [plx.google:m_lab.2010_01.all]
+  WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
+        IS_EXPLICITLY_DEFINED(project) AND
+        IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
+        web100_log_entry.log_time > 1262304000 AND
+        web100_log_entry.log_time < 1262476800
+  GROUP BY remote_ip
+)
+WHERE num_projects = 2;
+```
 Result:
 
     num_ip_addresses
@@ -268,28 +273,28 @@ Some IP addresses may have initiated tests, while others only have a few tests. 
 * The following query computes the number of tests initiated by each client IP address, groups the IP addresses by the number of tests run, and returns the number of IP addresses in each group.
 * The innermost nested query returns a table, where each row represents a test. BigQuery does not support the SQL command `DISTINCT` on multiple fields. So the query uses the `GROUP BY` clause to collapse all the rows with the same `test_id` and `remote_ip`. The [ BigQuery Query Reference][15] describes the `GROUP BY` command.
 * The outermost nested query returns a table, where each row represents a client IP address and contains the number of tests initiated by that address.
-``` 
-    SELECT num_tests,
-           COUNT(*) AS num_clients
-      FROM (
-        SELECT remote_ip,
-               COUNT(*) AS num_tests
-        FROM (
-          SELECT test_id,
-                 web100_log_entry.connection_spec.remote_ip AS remote_ip
-          FROM [plx.google:m_lab.2010_01.all]
-          WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
-                IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
-                web100_log_entry.log_time > 1262304000 AND
-                web100_log_entry.log_time < 1262476800 AND
-                IS_EXPLICITLY_DEFINED(web100_log_entry.log_time)
-          GROUP BY test_id, remote_ip
-      )
-      GROUP BY remote_ip
-    )
-    GROUP BY num_tests
-    ORDER BY num_tests ASC;
-``` 
+```sql
+SELECT num_tests,
+       COUNT(*) AS num_clients
+  FROM (
+    SELECT remote_ip,
+           COUNT(*) AS num_tests
+    FROM (
+      SELECT test_id,
+             web100_log_entry.connection_spec.remote_ip AS remote_ip
+      FROM [plx.google:m_lab.2010_01.all]
+      WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
+            IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
+            web100_log_entry.log_time > 1262304000 AND
+            web100_log_entry.log_time < 1262476800 AND
+            IS_EXPLICITLY_DEFINED(web100_log_entry.log_time)
+      GROUP BY test_id, remote_ip
+  )
+  GROUP BY remote_ip
+)
+GROUP BY num_tests
+ORDER BY num_tests ASC;
+```
 Result:
 
     num_tests num_clients
