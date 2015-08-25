@@ -124,14 +124,14 @@ Let's start with something simple! How many users have ever run **any** test?
 * The following query counts the number of unique IP addresses of clients that have ever run at least one test (between midnight Jan 1 2010 and midnight Jan 3 2010).
 * The query only takes into account rows where `web100_log_entry.log_time` and `web100_log_entry.connection_spec.remote_ip` are defined. The [ BigQuery Query Reference][12] describes the `IS_EXPLICITLY_DEFINED` function.
 * `1262304000` is Jan 1 2010 00:00:00 in Unix time, UTC. `1262476800` is Jan 3 2010 00:00:00 in Unix time, UTC.
-``` 
-    SELECT COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients
-    FROM [plx.google:m_lab.2010_01.all]
-    WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
-          IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
-          web100_log_entry.log_time > 1262304000 AND
-          web100_log_entry.log_time < 1262476800;
-``` 
+```sql
+SELECT COUNT(DISTINCT web100_log_entry.connection_spec.remote_ip) AS num_clients
+FROM [plx.google:m_lab.2010_01.all]
+WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND
+      IS_EXPLICITLY_DEFINED(web100_log_entry.log_time) AND
+      web100_log_entry.log_time > 1262304000 AND
+      web100_log_entry.log_time < 1262476800;
+```
 Result:
 
     num_clients
