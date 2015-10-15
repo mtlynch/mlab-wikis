@@ -165,7 +165,7 @@ Server-to-client RTT is affected by TCP congestion. As a consequence, there are 
   1. Server-client **latency during data transfers** (with congestion)
     * Estimated using the **average RTT**, uniformly averaged over an entire test.
     * This value can be computed as `web100_log_entry.snap.SumRTT/web100_log_entry.snap.CountRTT`
-    * In this case, it makes sense to exclude results of tests with fewer than **10 round trip time samples**, because there are not enough samples to accurately estimate the RTT. This condition is expressed in BigQuery with:`web100_log_entry.snap.CountRTT > 10`
+    * In this case, it makes sense to exclude results of tests with **10 or fewer round trip time samples**, because there are not enough samples to accurately estimate the RTT. This condition is expressed in BigQuery with:`web100_log_entry.snap.CountRTT > 10`
 
 Given that the NDT server updates the web100 variables `web100_log_entry.snap.MinRTT` and `web100_log_entry.snap.CountRTT` only when it receives an acknowledgement and given that, during client-to-server tests the NDT server receives an ack only during the 3-way-handshake, RTT values are computed only for server-to-client tests.
 
@@ -198,7 +198,7 @@ WHERE
       web100_log_entry.snap.SndLimTimeSnd) < 3600000000
  AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.MinRTT)
  AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CountRTT)
- AND web100_log_entry.snap.CountRTT > 0
+ AND web100_log_entry.snap.CountRTT > 10
  AND (web100_log_entry.snap.State == 1
       OR (web100_log_entry.snap.State >= 5
           AND web100_log_entry.snap.State <= 11))
