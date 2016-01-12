@@ -123,9 +123,8 @@ FROM (
   FROM
     [plx.google:m_lab.ndt.all]
   WHERE
-    web100_log_entry.log_time IS NOT NULL
-    AND ((web100_log_entry.log_time >= 1443657600)  -- 2015-10-01T00:00:00Z
-      AND (web100_log_entry.log_time < 1451606400)) -- 2016-01-01T00:00:00Z
+    ((web100_log_entry.log_time >= 1443657600)     -- 2015-10-01T00:00:00Z
+     AND (web100_log_entry.log_time < 1451606400)) -- 2016-01-01T00:00:00Z
   GROUP BY
     day
   ORDER BY
