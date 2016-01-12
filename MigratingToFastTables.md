@@ -90,53 +90,47 @@ The query below calculates the total number of NDT tests performed against M-Lab
 
 ```
 SELECT
-  STRFTIME_UTC_USEC(day, '%Y-%m-%d') AS day,
-  num_tests
-FROM (
-  SELECT
-    UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000) AS day,
-    COUNT(*) AS num_tests
-  FROM
-    [plx.google:m_lab.2015_10.all],
-    [plx.google:m_lab.2015_11.all],
-    [plx.google:m_lab.2015_12.all]
-  WHERE
-    project = 0
-    AND web100_log_entry.is_last_entry = TRUE
-    AND web100_log_entry.log_time IS NOT NULL
-  GROUP BY
-    day
-  ORDER BY
-    day ASC );
+  STRFTIME_UTC_USEC(web100_log_entry.log_time * 1000000,
+                    '%Y-%m-%d') AS day,
+  COUNT(*) AS num_tests
+FROM
+  [plx.google:m_lab.2015_10.all],
+  [plx.google:m_lab.2015_11.all],
+  [plx.google:m_lab.2015_12.all]
+WHERE
+  project = 0
+  AND web100_log_entry.is_last_entry = TRUE
+  AND web100_log_entry.log_time IS NOT NULL
+GROUP BY
+  day
+ORDER BY
+  day ASC
 ```
 
 ### Converted to use fast tables
 
 ```
 SELECT
-  STRFTIME_UTC_USEC(day, '%Y-%m-%d') AS day,
-  num_tests
-FROM (
-  SELECT
-    UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000) AS day,
-    COUNT(*) AS num_tests
-  FROM
-    [plx.google:m_lab.ndt.all]
-  WHERE
-    ((web100_log_entry.log_time >= 1443657600)     -- 2015-10-01T00:00:00Z
-     AND (web100_log_entry.log_time < 1451606400)) -- 2016-01-01T00:00:00Z
-  GROUP BY
-    day
-  ORDER BY
-    day ASC );
+  STRFTIME_UTC_USEC(web100_log_entry.log_time * 1000000,
+                    '%Y-%m-%d') AS day,
+  COUNT(*) AS num_tests
+FROM
+  [plx.google:m_lab.ndt.all]
+WHERE
+  ((web100_log_entry.log_time >= 1443657600)     -- 2015-10-01T00:00:00Z
+   AND (web100_log_entry.log_time < 1451606400)) -- 2016-01-01T00:00:00Z
+GROUP BY
+  day
+ORDER BY
+  day ASC
 ```
 
 The converted query performs significantly faster than the original:
 
 | Query Type                   | Observed Execution Time |
 |------------------------------|-------------------------|
-| Original query               | 236.8 seconds           |
-| Converted to use fast tables | 7.3 seconds             |
+| Original query               | 129.1 seconds           |
+| Converted to use fast tables | 5.8 seconds             |
 
 ## Questions / Feedback
 
