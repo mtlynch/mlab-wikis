@@ -29,7 +29,8 @@ The full list of available fast tables is:
 
 If your queries were using the table names as a means of limiting a query to a particular time range, it will be necessary to add `WHERE` clauses to continue enforcing this time range.
 
-For NDT, NPAD, and SideStream, add a query of the following form:
+For NDT, NPAD, and SideStream, add a query of the following form (where the
+numeric values are UNIX timestamps in seconds):
 
 ```
 WHERE
@@ -37,7 +38,17 @@ WHERE
    AND (web100_log_entry.log_time < 1427846400)) -- 2015-04-01T00:00:00Z
 ```
 
-For Paris Traceroute, add a query of the following form:
+BigQuery also provides a number of date/time formatting functions to convert
+human-readable dates into timestamps, for example:
+
+```
+WHERE
+  (web100_log_entry.log_time >= PARSE_UTC_USEC("2015-01-01 00:00:00") / POW(10, 6))
+   AND (web100_log_entry.log_time < PARSE_UTC_USEC("2015-04-01 00:00:00") / POW(10, 6))
+```
+
+For Paris Traceroute, add a query of the following form (where the numeric
+values are UNIX timestamps in seconds):
 
 ```
 WHERE
@@ -45,7 +56,14 @@ WHERE
    AND (log_time < 1427846400))                  -- 2015-04-01T00:00:00Z
 ```
 
-Where the numeric values are UNIX timestamps (in seconds).
+BigQuery also provides a number of date/time formatting functions to convert
+human-readable dates into timestamps, for example:
+
+```
+WHERE
+  (log_time >= PARSE_UTC_USEC("2015-01-01 00:00:00") / POW(10, 6))
+   AND (log_time < PARSE_UTC_USEC("2015-04-01 00:00:00") / POW(10, 6))
+```
 
 ## 3. (optional) Remove `WHERE` clauses for `project`
 
@@ -78,7 +96,7 @@ WHERE
 
 It is not strictly necessary to remove `is_last_entry` clauses when using the new tables, but doing so will improve query performance.
 
-Note that this does not apply to Paris Traceroute data, as Paris Traceroute is not web100-based, so Paris Traceroute queries never included this clause.
+*Note: this does not apply to Paris Traceroute data, as Paris Traceroute is not web100-based, so Paris Traceroute queries never included this clause.*
 
 ## Complete Example
 
