@@ -46,6 +46,28 @@ WHERE
    AND (log_time < 1427846400))                  -- 2015-04-01T00:00:00Z
 ```
 
+### Optional time formatting functions
+
+BigQuery also provides [date/time](https://cloud.google.com/bigquery/query-reference?hl=en#datetimefunctions) formatting functions to convert human-readable time values into UNIX timestamps.
+
+For example, for NDT, NPAD, or SideStream queries:
+
+```
+WHERE
+  ((web100_log_entry.log_time >=
+     PARSE_UTC_USEC("2015-01-01 00:00:00") / POW(10, 6))
+   AND (web100_log_entry.log_time <
+          PARSE_UTC_USEC("2015-04-01 00:00:00") / POW(10, 6)))
+```
+
+And for Paris Traceroute queries:
+
+```
+WHERE
+  ((log_time >= PARSE_UTC_USEC("2015-01-01 00:00:00") / POW(10, 6))
+   AND (log_time < PARSE_UTC_USEC("2015-04-01 00:00:00") / POW(10, 6)))
+```
+
 ## 3. (optional) Remove `WHERE` clauses for `project`
 
 M-Lab's existing tables combine data for several different M-Lab projects (NDT, NPAD, SideStream, and Paris Traceroute) into the same table. As such, queries for a particular project's data required the query author to add a `WHERE project=XX` clause to restrict the query to a particular project. The new, fast tables are grouped on a per-project basis, so project filters are not necessary.
