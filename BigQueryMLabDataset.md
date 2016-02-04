@@ -42,7 +42,7 @@ The following table describes the schema of the BigQuery table that contains M-L
 | `test_id`                                           |  `string`    |  ID of the test. It represents the filename of the log that contains the data generated during the test (e.g., 20090819T02:01:04.507508000Z_189.6.232.77:3859.c2s_snaplog.gz). |
 | `project`                                           |  `integer`   |  Tool that ran the test. {NDT = `0`, NPAD = `1`, SideStream = `2`, paris-traceroute = `3`}  |
 | `type`                                              |  `integer`   |  Currently not supported. |
-| `log_time`                                          |  `integer`   |  Time when the Web100 log was created (in seconds since the Unix epoch, UTC). (This field is **optional**. It's preferable to use `web100_log_entry.log_time`.) |
+| `log_time`                                          |  `integer`   |  Timestamp of when test log was created (in seconds since Unix epoch). For NDT and NPAD, this is derived from the "Date/Time" field in the .meta file (for NDT and NPAD, prefer the `web100_log_entry.log_time` field, as it is more reliable). For SideStream and Paris Traceroute, this is the timestamp as represented in the test log file's filename. |
 | `connection_spec.data_direction`                    |  `integer`   |  Direction of the data sent during the test. {CLIENT_TO_SERVER = `0`, SERVER_TO_CLIENT = `1`} |
 | `connection_spec.server_ip`                         |  `string`    |  Server's IP address. (This field is **optional**. It's preferable to use <br>
 `web100_log_entry.connection_spec.local_ip`.) |
@@ -80,7 +80,7 @@ The following table describes the schema of the BigQuery table that contains M-L
 | `connection_spec.server_geolocation.latitude`       |  `float`     |   |
 | `connection_spec.server_geolocation.longitude`      |  `float`     |   |
 | `web100_log_entry.version`                          |  `string`    |  Web100 kernel patch version running on the server (as defined in <br>/proc/web100/header). |
-| `web100_log_entry.log_time`                         |  `integer`   |  Time when the Web100 log was created (in seconds since the Unix epoch, UTC). |
+| `web100_log_entry.log_time`                         |  `integer`   |  Timestamp of when the Web100 log was created (in seconds since Unix epoch). For NDT and NPAD, this is derived by calling the [`web100_get_log_time()`](https://github.com/web100/web100-userland/blob/master/lib/web100.h) function on the web100 log file. For SideStream, this is the value of the `PollTime` field in web100 ASCII log. |
 | `web100_log_entry.is_last_entry`                    |  `bool`      |  Is this the last entry of this Web100 log file? |
 | `web100_log_entry.group_name`                       |  `string`    |  Web100 group name (not supported by the current Web100 implementation).  |
 | `web100_log_entry.connection_spec.local_ip`         |  `string`    |  IP address of the M-Lab server, as logged in the Web100 log. |
